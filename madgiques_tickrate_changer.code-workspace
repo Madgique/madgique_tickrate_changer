@@ -1,0 +1,25 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true,
+      "**/.svn": true,
+      "**/.hg": true,
+      "**/CVS": true,
+      "**/.DS_Store": true,
+      "**/Thumbs.db": true,
+    },
+    "java.import.gradle.java.home": "E:\\Logiciels\\Java\\jdk17",
+    "java.configuration.updateBuildConfiguration": "disabled",
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+      {
+        "text": "Generate commit messages in English."
+      }
+    ],
+    "java.compile.nullAnalysis.mode": "disabled"
+  }
+}

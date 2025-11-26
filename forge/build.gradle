@@ -4,7 +4,7 @@ plugins {
 
 loom {
     forge {
-        mixinConfig "tickrate_changer_rezurrection.mixins.json"
+        mixinConfig "madgique_tickrate_changer.mixins.json"
     }
 }
 
