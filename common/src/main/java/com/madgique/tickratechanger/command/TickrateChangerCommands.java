@@ -8,8 +8,11 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -26,14 +29,35 @@ public class TickrateChangerCommands {
             )
             .then(Commands.literal("setdefault")
                     .then(Commands.argument("ticks", IntegerArgumentType.integer())
-                            .executes(context -> setDefaultTickrate(context,  true))
+                            .executes(context -> setDefaultTickrate(context, true, true))
                             .then(Commands.literal("--dontsave")
-                                    .executes(context -> setDefaultTickrate(context, false))
+                                    .executes(context -> setDefaultTickrate(context, false, true))
+                                    .then(Commands.literal("--dontupdate")
+                                            .executes(context -> setDefaultTickrate(context, false, false))
+                                    )
+                            )
+                            .then(Commands.literal("--dontupdate")
+                                    .executes(context -> setDefaultTickrate(context, true, false))
+                                    .then(Commands.literal("--dontsave")
+                                            .executes(context -> setDefaultTickrate(context, false, false))
+                                    )
                             )
                     )
             )
             .then(Commands.argument("ticks", IntegerArgumentType.integer())
                     .executes(context -> changeTickrate(context))
+                    .then(Commands.literal("all")
+                            .executes(context -> changeTickrate(context))
+                    )
+                    .then(Commands.literal("server")
+                            .executes(context -> changeServerTickrate(context))
+                    )
+                    .then(Commands.literal("client")
+                            .executes(context -> changeClientTickrate(context))
+                    )
+                    .then(Commands.argument("player", EntityArgument.player())
+                            .executes(context -> changePlayerTickrate(context))
+                    )
             )
             .executes(context -> showInfo(context.getSource()))
     );
@@ -75,9 +99,15 @@ public class TickrateChangerCommands {
     return stack.hasPermission(2);
   }
 
-  private static int setDefaultTickrate(CommandContext<CommandSourceStack> context, boolean willSave) {
+  private static int setDefaultTickrate(CommandContext<CommandSourceStack> context, boolean willSave, boolean willUpdate) {
     int tickrate = IntegerArgumentType.getInteger(context, "ticks");
     TickrateAPI.changeDefaultTickrate(tickrate, willSave);
+
+    if (willUpdate) {
+      MinecraftServer server = context.getSource().getServer();
+      TickrateAPI.changeTickrate(tickrate, server);
+    }
+
     return Command.SINGLE_SUCCESS;
   }
 
@@ -88,10 +118,31 @@ public class TickrateChangerCommands {
     return Command.SINGLE_SUCCESS;
   }
 
+  private static int changeServerTickrate(CommandContext<CommandSourceStack> context) {
+    int tickrate = IntegerArgumentType.getInteger(context, "ticks");
+    TickrateAPI.changeServerTickrate(tickrate);
+    return Command.SINGLE_SUCCESS;
+  }
+
+  private static int changeClientTickrate(CommandContext<CommandSourceStack> context) {
+    int tickrate = IntegerArgumentType.getInteger(context, "ticks");
+    MinecraftServer server = context.getSource().getServer();
+    TickrateAPI.changeClientTickrate(tickrate, server);
+    return Command.SINGLE_SUCCESS;
+  }
+
+  private static int changePlayerTickrate(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    int tickrate = IntegerArgumentType.getInteger(context, "ticks");
+    ServerPlayer player = EntityArgument.getPlayer(context, "player");
+    TickrateAPI.changeClientTickrate(player, tickrate);
+    return Command.SINGLE_SUCCESS;
+  }
+
   private static int showHelp(CommandSourceStack source) {
     source.sendSuccess(() -> Component.literal("Usage: /tickrate [ticks per second] [help/info]"), false);
     source.sendSuccess(() -> Component.literal("/tickrate help - Shows this help message"), false);
     source.sendSuccess(() -> Component.literal("/tickrate info - Displays the current tickrate"), false);
+    source.sendSuccess(() -> Component.literal("/tickrate <ticks> <player> - Changes tickrate for a specific player"), false);
     return 1;
   }
 
@@ -112,7 +163,6 @@ public class TickrateChangerCommands {
 
     MutableComponent example1Message = Component.literal("/tickrate <ticks per second> [all/server/client/ playername ]");
     MutableComponent example2Message = Component.literal("/tickrate setdefault <ticks per second> [--dontsave, --dontupdate]");
-    MutableComponent example3Message = Component.literal("/tickrate setmap <ticks per second> [--dontupdate]");
 
 
     MutableComponent help1 = Component.literal("Use" + SPACE).setStyle(helpMessagesStyle);
@@ -130,7 +180,6 @@ public class TickrateChangerCommands {
     source.sendSuccess(() -> Component.literal(SPACE), false);
     source.sendSuccess(() -> example1Message.withStyle(exampleMessagesStyle), false);
     source.sendSuccess(() -> example2Message.withStyle(exampleMessagesStyle), false);
-    source.sendSuccess(() -> example3Message.withStyle(exampleMessagesStyle), false);
     source.sendSuccess(() -> Component.literal(SPACE), false);
     source.sendSuccess(() -> helpInfoMessage, false);
 

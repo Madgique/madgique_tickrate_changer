@@ -1,0 +1,78 @@
+name: Publish to Modrinth and CurseForge
+
+on:
+  push:
+    tags:
+      - 'v*' # Déclenche sur les tags comme v1.0.0, v1.1.0, etc.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Extract version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Publish Forge to Modrinth and CurseForge
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: ${{ secrets.MODRINTH_PROJECT_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+          curseforge-id: ${{ secrets.CURSEFORGE_PROJECT_ID }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: forge/build/libs/*-forge.jar
+          name: Madgique's Tickrate Changer ${{ steps.get_version.outputs.VERSION }} (Forge)
+          version: ${{ steps.get_version.outputs.VERSION }}-forge
+          version-type: release
+
+          loaders: forge
+          game-versions: "1.20.1"
+
+          dependencies: |
+            architectury-api(required)
+            cloth-config(required)
+
+          changelog-file: CHANGELOG.md
+
+      - name: Publish Fabric to Modrinth and CurseForge
+        uses: Kir-Antipov/mc-publish@v3.3
+        with:
+          modrinth-id: ${{ secrets.MODRINTH_PROJECT_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+          curseforge-id: ${{ secrets.CURSEFORGE_PROJECT_ID }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: fabric/build/libs/*-fabric.jar
+          name: Madgique's Tickrate Changer ${{ steps.get_version.outputs.VERSION }} (Fabric)
+          version: ${{ steps.get_version.outputs.VERSION }}-fabric
+          version-type: release
+
+          loaders: fabric
+          game-versions: "1.20.1"
+
+          dependencies: |
+            architectury-api(required)
+            fabric-api(required)
+            cloth-config(required)
+
+          changelog-file: CHANGELOG.md

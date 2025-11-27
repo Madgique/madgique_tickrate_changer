@@ -142,3 +142,14 @@ The project follows Architectury's multi-platform pattern:
 - This mod provides commands to control game tickrate (see [Wiki Commands](https://github.com/Madgique/madgique_tickrate_changer/wiki/Commands))
 - Core functionality involves manipulating Minecraft's tick loop timing
 - Changes affect both client and server tickrate depending on the command used
+
+### Original Mod Reference
+- **IMPORTANT**: If you need to understand how the original tickrate changing mechanism worked, refer to the original 1.12.2 mod: [TickrateChanger by Guichaguri](https://github.com/Guichaguri/TickrateChanger)
+- Note: The original mod was:
+  - Built for Minecraft 1.12.2
+  - Forge-only (no Fabric support)
+  - Did NOT use Architectury (single-platform mod)
+- This current mod is a port/resurrection adapted for:
+  - Minecraft 1.20.1
+  - Multi-platform support (Forge + Fabric)
+  - Using Architectury for cross-platform compatibility
