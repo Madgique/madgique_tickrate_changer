@@ -55,10 +55,7 @@ subprojects {
     apply plugin: 'architectury-plugin'
     apply plugin: 'maven-publish'
 
-    base {
-        // Set up a suffixed format for the mod jar names, e.g. `example-fabric`.
-        archivesName = "$rootProject.archives_name-$project.name"
-    }
+    archivesBaseName = "$rootProject.archives_name-$rootProject.minecraft_version"
 
     repositories {
         // Add repositories to retrieve artifacts from in here.
