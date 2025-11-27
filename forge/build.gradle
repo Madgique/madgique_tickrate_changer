@@ -78,4 +78,5 @@ shadowJar {
 
 remapJar {
     input.set shadowJar.archiveFile
+    archiveClassifier.set("forge")
 }

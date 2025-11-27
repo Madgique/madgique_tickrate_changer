@@ -13,7 +13,7 @@
       "**/.DS_Store": true,
       "**/Thumbs.db": true,
     },
-    "java.import.gradle.java.home": "E:\\Logiciels\\Java\\jdk17",
+    "java.import.gradle.java.home": "${env:JDK_PATH}",
     "java.configuration.updateBuildConfiguration": "disabled",
     "github.copilot.chat.commitMessageGeneration.instructions": [
       {

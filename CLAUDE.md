@@ -126,10 +126,6 @@ The project follows Architectury's multi-platform pattern:
 - The GitHub Actions workflow uses `changelog-file: CHANGELOG.md` which will upload only the current version's notes
 - Example format:
   ```markdown
-  # Changelog
-
-  ## [X.Y.Z] - YYYY-MM-DD
-
   ### Added
   - Feature 1
   - Feature 2
